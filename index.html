@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Countdown</title>
+  <style>
+    body {
+      background: black;
+      color: white;
+      text-align: center;
+      font-family: Arial;
+      padding-top: 50px;
+    }
+    #timer {
+      font-size: 48px;
+    }
+    #videoContainer {
+      display: none;
+    }
+    video {
+      width: 80%;
+      max-width: 900px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="timer">10:00</div>
+
+<div id="videoContainer">
+  <video id="video" autoplay muted controls>
+    <source src="video.mp4" type="video/mp4">
+  </video>
+</div>
+
+<script>
+  let totalSeconds = 125;
+  const timer = document.getElementById("timer");
+  const video = document.getElementById("video");
+  const videoContainer = document.getElementById("videoContainer");
+
+  function format(t) {
+    return String(Math.floor(t / 60)).padStart(2, "0") + ":" +
+           String(t % 60).padStart(2, "0");
+  }
+
+  setInterval(() => {
+    totalSeconds--;
+    timer.textContent = format(totalSeconds);
+
+    if (totalSeconds === 120) {
+      timer.style.display = "none";
+      videoContainer.style.display = "block";
+      video.play();
+    }
+  }, 1000);
+</script>
+
+</body>
+</html>
