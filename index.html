@@ -1,59 +1,87 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Countdown</title>
+  <meta charset="UTF-8" />
+  <title>Countdown to 2026 + Video</title>
   <style>
     body {
-      background: black;
-      color: white;
+      font-family: Arial, sans-serif;
       text-align: center;
-      font-family: Arial;
       padding-top: 50px;
+      background: #000;
+      color: #fff;
     }
     #timer {
       font-size: 48px;
+      margin-bottom: 20px;
     }
-    #videoContainer {
-      display: none;
-    }
-    video {
-      width: 80%;
-      max-width: 900px;
-    }
+    #videoContainer { display: none; }
+    video { width: 720px; max-width: 95%; }
   </style>
 </head>
 <body>
 
-<div id="timer">10:00</div>
+<div id="timer">--:--:--</div>
 
 <div id="videoContainer">
-  <video id="video" autoplay muted controls>
-    <source src="video.mp4" type="video/mp4">
+  <!-- локальное видео рядом с index.html -->
+  <video id="video" autoplay muted controls playsinline>
+    <source src="video.mp4" type="video/mp4" />
+    Ваш браузер не поддерживает видео.
   </video>
 </div>
 
 <script>
-  let totalSeconds = 125;
-  const timer = document.getElementById("timer");
+  const timerEl = document.getElementById("timer");
+  const videoCont = document.getElementById("videoContainer");
   const video = document.getElementById("video");
-  const videoContainer = document.getElementById("videoContainer");
 
-  function format(t) {
-    return String(Math.floor(t / 60)).padStart(2, "0") + ":" +
-           String(t % 60).padStart(2, "0");
+  // Новый год 2026: 01.01.2026 00:00:00 по локальному времени компьютера
+  const target = new Date(2026, 0, 1, 0, 0, 0, 0);
+
+  let videoShown = false;
+
+  function formatHMS(totalSeconds) {
+    const h = Math.floor(totalSeconds / 3600).toString().padStart(2, "0");
+    const m = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, "0");
+    const s = Math.floor(totalSeconds % 60).toString().padStart(2, "0");
+    return `${h}:${m}:${s}`;
   }
 
-  setInterval(() => {
-    totalSeconds--;
-    timer.textContent = format(totalSeconds);
+  function tick() {
+    const now = new Date();
+    const diffMs = target - now;               // миллисекунды до НГ
+    const diffSec = Math.max(0, diffMs / 1000);
 
-    if (totalSeconds === 120) {
-      timer.style.display = "none";
-      videoContainer.style.display = "block";
-      video.play();
+    // Показать видео за последние 2 минуты (<= 120 сек)
+    if (!videoShown && diffSec <= 120) {
+      videoShown = true;
+      timerEl.style.display = "none";
+      videoCont.style.display = "block";
+      video.play().catch(() => {});
     }
-  }, 1000);
+
+    if (!videoShown) {
+      timerEl.textContent = formatHMS(Math.floor(diffSec));
+    }
+
+    // После наступления НГ можно остановить обновление таймера (видео продолжает)
+    if (diffMs <= 0) {
+      // если видео еще не показали (например, открыли страницу в последние секунды)
+      if (!videoShown) {
+        videoShown = true;
+        timerEl.style.display = "none";
+        videoCont.style.display = "block";
+        video.play().catch(() => {});
+      }
+      return;
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  // старт
+  tick();
 </script>
 
 </body>
